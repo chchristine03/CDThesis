@@ -4,7 +4,9 @@
   "description": "TypeScript client for Spotify Web API",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "next build",
+    "build:lib": "tsc -p tsconfig.json",
+    "dev": "next dev",
     "web:dev": "next dev",
     "web:build": "next build",
     "web:start": "next start",

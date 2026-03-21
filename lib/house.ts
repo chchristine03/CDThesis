@@ -222,7 +222,7 @@ export function clamp01(value: number): number {
 export function buildHouseSpecFromSpotify(input: {
   profile: {
     id: string;
-    display_name: string;
+    display_name: string | null;
     country?: string;
     product?: string;
     followers?: { total?: number };
@@ -305,7 +305,7 @@ export function buildHouseSpecFromSpotify(input: {
     avgTrackPopularity: Math.round(avgTrackPopularity),
     userProfile: {
       id: profile.id,
-      displayName: profile.display_name,
+      displayName: profile.display_name ?? 'Spotify Listener',
       country: profile.country ?? null,
       product: profile.product ?? null,
       followers: profile.followers?.total ?? null,

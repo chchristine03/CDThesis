@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Script from 'next/script';
-import { useSearchParams } from 'next/navigation';
 import type { HouseSpec } from '../../lib/house';
 import './adventure.css';
 
@@ -159,9 +158,17 @@ const stage4TextureMap: Record<string, string> = {
 };
 
 export default function AdventurePage() {
-  const searchParams = useSearchParams();
-  const demo = searchParams.get('demo') === '1';
-  const preset = searchParams.get('preset') ?? 'calm';
+  const [demo, setDemo] = useState(false);
+  const [preset, setPreset] = useState('calm');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setDemo(params.get('demo') === '1');
+    const presetParam = params.get('preset');
+    if (presetParam) {
+      setPreset(presetParam);
+    }
+  }, []);
 
   const endpoint = useMemo(() => {
     if (demo) {
