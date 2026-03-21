@@ -1,0 +1,45 @@
+{
+  "name": "spotify-api-client",
+  "version": "1.0.0",
+  "description": "TypeScript client for Spotify Web API",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "web:dev": "next dev",
+    "web:build": "next build",
+    "web:start": "next start",
+    "test": "ts-node test.ts",
+    "test:analysis": "ts-node test-analysis.ts",
+    "test:search": "ts-node test-search.ts",
+    "start": "node dist/index.js",
+    "auth": "ts-node src/auth-server.ts",
+    "refresh-token": "ts-node src/token-utils.ts"
+  },
+  "keywords": [
+    "spotify",
+    "api",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "html2canvas": "^1.4.1",
+    "@mediapipe/tasks-vision": "^0.10.14",
+    "next": "^14.2.5",
+    "p5": "^2.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/p5": "^1.7.6",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  }
+}
