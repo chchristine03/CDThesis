@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { SpotifyClient } from '../../../src/spotify-client';
 import { computeRoutineDiscovery } from '../../../src/routine-discovery';
 import { computePlaylistCuration } from '../../../src/playlist-curation';
+import {
+  getSpotifyAccessTokenForRequest,
+  setSpotifyAuthCookies,
+} from '../../../lib/spotify-auth';
 
 type Stage2Label =
   | 'NO_ARTIST_TIES'
@@ -10,21 +14,24 @@ type Stage2Label =
   | 'ONE_ARTIST_OBSESSED'
   | null;
 
-export async function GET() {
-  const accessToken = process.env.SPOTIFY_ACCESS_TOKEN;
-  if (!accessToken) {
-    return NextResponse.json({ error: 'Missing Spotify access token.' }, { status: 401 });
+export async function GET(request: NextRequest) {
+  const auth = await getSpotifyAccessTokenForRequest(request);
+  if (!auth.accessToken) {
+    return NextResponse.json(
+      { error: 'Missing Spotify access token. Please login via /api/auth/login.' },
+      { status: 401 }
+    );
   }
 
   try {
-    const client = new SpotifyClient(accessToken);
+    const client = new SpotifyClient(auth.accessToken);
     const [recent, topShort, topMedium, topLong, routine, curation] = await Promise.all([
       client.getRecentlyPlayed(50),
       client.getTopTracks('short_term', 50, 0),
       client.getTopTracks('medium_term', 50, 0),
       client.getTopTracks('long_term', 50, 0),
-      computeRoutineDiscovery(accessToken),
-      computePlaylistCuration(accessToken),
+      computeRoutineDiscovery(auth.accessToken),
+      computePlaylistCuration(auth.accessToken),
     ]);
 
     // Stage 2: Identity vs Diversity + artist frequency (tracks containing artist)
@@ -191,7 +198,7 @@ export async function GET() {
       stage3Label = 'LOCKED_IN';
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       stage1: routine,
       stage2: {
         label: stage2Label,
@@ -223,6 +230,14 @@ export async function GET() {
         recentPlayedAt: recent.map((item) => item.played_at),
       },
     });
+    if (auth.refreshed) {
+      setSpotifyAuthCookies(
+        response,
+        auth.refreshedTokens,
+        auth.existingRefreshToken
+      );
+    }
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
