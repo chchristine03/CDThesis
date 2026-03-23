@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Script from 'next/script';
+import Link from 'next/link';
 import type { HouseSpec } from '../../lib/house';
 import './adventure.css';
 
@@ -886,7 +887,7 @@ export default function AdventurePage() {
             const j = Math.floor(Math.random() * (i + 1));
             [assign[i], assign[j]] = [assign[j], assign[i]];
           }
-          const radius = 230;
+          const radius = 205;
           const shapes: Array<'plane' | 'box' | 'sphere'> = ['plane', 'box', 'sphere'];
           for (let i = 0; i < TOTAL_SPHERE_POINTS && i < assign.length; i++) {
             const t = i / (TOTAL_SPHERE_POINTS - 1 || 1);
@@ -895,8 +896,13 @@ export default function AdventurePage() {
             const x = radius * Math.sin(inclination) * Math.cos(azimuth);
             const y = radius * Math.sin(inclination) * Math.sin(azimuth);
             const z = radius * Math.cos(inclination);
-            const size = 20 + (i % 6) * 6;
+            const stageKey = assign[i];
             const shape = shapes[i % 3];
+            const sizeCycle = [22, 24, 26, 27, 28, 28, 29, 30, 30, 31, 32, 32, 34];
+            const baseSize = sizeCycle[i % sizeCycle.length];
+            const shapeScale = shape === 'plane' ? 1.04 : shape === 'sphere' ? 0.94 : 0.98;
+            const stageScale = stageKey === 'stage1' ? 1.2 : 1;
+            const size = Math.round(baseSize * shapeScale * stageScale);
             const phase = (i % 12) * 0.45;
             const spin = (i % 7) * 0.6 + 0.4;
             spherePoints.push({
@@ -905,7 +911,7 @@ export default function AdventurePage() {
               z,
               size,
               shape,
-              textureKey: assign[i],
+              textureKey: stageKey,
               phase,
               spin,
             });
@@ -939,7 +945,7 @@ export default function AdventurePage() {
           const motion = p.constrain(lastSpeedRef.current / 80, 0, 1);
           const lineAlphaBase = Math.max(0.12, zoomInFactor, motion * 0.55);
           const filter = selectedStageFilterRef.current;
-          const dimOpacity = 0.32;
+          const dimOpacity = 0.55;
           const isFiltered = filter !== null;
 
           // Sphere populated with the 4 persona images (intensity-weighted)
@@ -956,9 +962,9 @@ export default function AdventurePage() {
             const isStage4Point = point.textureKey === 'stage4';
             const shimmer = (Math.sin(t * 1.6 + point.phase) + 1) * 0.5;
             const fade = (Math.sin(t * 0.8 + point.phase * 0.6) + 1) * 0.5;
-            let alpha = 72 + fade * 235;
+            let alpha = 190 + fade * 65;
             if (isStage4Point) {
-              alpha *= 0.8;
+              alpha *= 0.95;
             }
             if (isFiltered && point.textureKey !== `stage${filter}`) {
               alpha *= dimOpacity;
@@ -971,11 +977,11 @@ export default function AdventurePage() {
             p.scale(scale);
             p.noLights();
             if (isStage4Point) {
-              p.tint(235, 220, 200, alpha);
+              p.tint(178, 158, 138, alpha);
               p.blendMode(p.BLEND);
             } else {
               p.tint(255, alpha);
-              p.blendMode(p.SCREEN);
+              p.blendMode(p.BLEND);
             }
             p.texture(texture);
             if (point.shape === 'plane') {
@@ -1068,46 +1074,55 @@ export default function AdventurePage() {
               if (!isFiltered) return 255;
               return filter === stage ? 255 : Math.round(255 * dimOpacity);
             };
-            // Stage 1: floating 2D image (left/front) - plane showing image as artwork
+            // Stage 1: floating 2D image (sphere surface anchor)
             if (stage1Image) {
               p.push();
-              p.translate(-180, 0, 100);
+              p.translate(118, 118, 118);
               p.rotateY(90);
               p.noLights();
-              p.tint(255, visDim(1));
+              p.push();
+              p.blendMode(p.ADD);
+              p.noStroke();
+              p.translate(0, 0, -3);
+              p.tint(196, 218, 255, Math.round(visDim(1) * 0.34));
               p.texture(stage1Image);
-              p.plane(90, 90);
+              p.plane(146, 146);
+              p.pop();
+              p.blendMode(p.BLEND);
+              p.tint(255, Math.round(visDim(1) * 0.98));
+              p.texture(stage1Image);
+              p.plane(122, 122);
               p.pop();
               p.ambientLight(180);
               p.directionalLight(255, 255, 255, 0.2, 0.5, -1);
             }
-            // Stage 2: rectangular box with texture (right)
+            // Stage 2: rectangular box with texture (sphere surface anchor)
             if (stage2Texture) {
               p.push();
-              p.translate(180, 0, 80);
+              p.translate(-118, -118, 118);
               p.rotateY(t * 8);
               p.tint(255, visDim(2));
               p.texture(stage2Texture);
               p.box(70, 70, 50);
               p.pop();
             }
-            // Stage 3: vertical plane/card with texture (upper/back)
+            // Stage 3: vertical plane/card with texture (sphere surface anchor)
             if (stage3Texture) {
               p.push();
-              p.translate(0, -120, 200);
+              p.translate(-118, 118, -118);
               p.rotateX(10);
               p.rotateY(t * 5);
-              p.tint(255, visDim(3));
+              p.tint(205, 220, 235, Math.round(visDim(3) * 0.72));
               p.texture(stage3Texture);
               p.plane(100, 100);
               p.pop();
             }
-            // Stage 4: larger architectural box (lower/front)
+            // Stage 4: larger architectural box (sphere surface anchor)
             if (stage4Texture) {
               p.push();
-              p.translate(0, 120, 50);
+              p.translate(118, -118, -118);
               p.rotateY(t * 6);
-              p.tint(235, 220, 200, Math.round(visDim(4) * 0.92));
+              p.tint(172, 152, 132, Math.round(visDim(4) * 0.9));
               p.texture(stage4Texture);
               p.box(120, 100, 80);
               p.pop();
@@ -1263,6 +1278,9 @@ export default function AdventurePage() {
         <p className="subtitle">
           A visual field generated from your Spotify parameters. Tap any object
           to learn why it appears.
+        </p>
+        <p className="subtitle">
+          <Link href="/adventure/raw">View raw user data</Link>
         </p>
       </header>
 

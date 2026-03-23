@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       ? redirectParam
       : `${origin}${redirectParam}`;
   } else {
+    //make sure it doesnt set origin to localhost
     target = `${origin}/adventure`;
   }
 
@@ -50,6 +51,9 @@ export async function GET(request: NextRequest) {
     path: '/',
     maxAge: 60 * 10,
   });
+  if (target.includes('localhost')) {
+    target = target.replace('localhost', '127.0.0.1');
+  }
   response.cookies.set(SPOTIFY_REDIRECT_COOKIE, target, {
     httpOnly: true,
     secure,

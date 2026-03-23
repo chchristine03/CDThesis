@@ -18,7 +18,7 @@ body {
 
 body.adventure-explore {
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2)),
+    linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.06)),
     url('/images/environment/space.jpg');
   background-size: cover;
   background-position: center;
