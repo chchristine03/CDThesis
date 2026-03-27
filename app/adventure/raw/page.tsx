@@ -51,8 +51,7 @@ export default function AdventureRawDataPage() {
     <main
       style={{
         padding: '1rem',
-        fontFamily:
-          'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        fontFamily: 'var(--font-sans), system-ui, sans-serif',
       }}
     >
       {state.status === 'loading' && <pre>Loading /api/stages...</pre>}

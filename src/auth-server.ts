@@ -141,6 +141,14 @@ function renderLandingPage(): string {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Listening Home — Spotify Listening Insights</title>
         <style>
+          @font-face {
+            font-family: 'Switzer-Variable';
+            src: url('/fonts/switzer/Switzer-Variable.woff2') format('woff2'),
+                 url('/fonts/switzer/Switzer-Variable.woff') format('woff');
+            font-weight: 100 900;
+            font-display: swap;
+            font-style: normal;
+          }
           :root {
             color-scheme: light;
             --bg: #07070b;
@@ -156,7 +164,7 @@ function renderLandingPage(): string {
           * { box-sizing: border-box; }
           body {
             margin: 0;
-            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            font-family: 'Switzer-Variable', system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
           }

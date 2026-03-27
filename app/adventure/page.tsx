@@ -1210,6 +1210,7 @@ export default function AdventurePage() {
 
   return (
     <main className="adventure">
+      <h1 className="adventure-sonosphere-title">SONOSPHERE</h1>
       <Script
         src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"
         strategy="afterInteractive"
@@ -1223,7 +1224,7 @@ export default function AdventurePage() {
       />
       <header className="adventure-header">
         <p className="eyebrow">Spotify House Adventure</p>
-        <h1>Your listening world</h1>
+        <h2>Your listening world</h2>
         <p className="subtitle">
           A visual field generated from your Spotify parameters. Tap any object
           to learn why it appears.
