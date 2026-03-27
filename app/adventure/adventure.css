@@ -37,6 +37,24 @@ body.adventure-explore {
   overflow: hidden;
 }
 
+/* Circular vignette: darker toward screen edges; above scene, below HUD (z-index 5+) */
+.adventure::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 28%,
+    rgba(0, 0, 0, 0.2) 48%,
+    rgba(0, 0, 0, 0.52) 68%,
+    rgba(0, 0, 0, 0.82) 88%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+}
+
 .adventure-header {
   display: none;
 }
@@ -81,27 +99,38 @@ body.adventure-explore {
   pointer-events: none;
   z-index: 1;
   mix-blend-mode: soft-light;
+  /* Long, soft radial falloff so the circle dissolves into the scene (no hard ring) */
   -webkit-mask-image: radial-gradient(
     circle at center,
-    rgba(0, 0, 0, 0.88) 10%,
-    rgba(0, 0, 0, 0.7) 28%,
-    rgba(0, 0, 0, 0.45) 46%,
-    rgba(0, 0, 0, 0.25) 62%,
-    rgba(0, 0, 0, 0.12) 76%,
-    rgba(0, 0, 0, 0.04) 88%,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.86) 18%,
+    rgba(0, 0, 0, 0.72) 32%,
+    rgba(0, 0, 0, 0.52) 46%,
+    rgba(0, 0, 0, 0.34) 58%,
+    rgba(0, 0, 0, 0.2) 68%,
+    rgba(0, 0, 0, 0.11) 77%,
+    rgba(0, 0, 0, 0.055) 85%,
+    rgba(0, 0, 0, 0.025) 91%,
+    rgba(0, 0, 0, 0.008) 96%,
     rgba(0, 0, 0, 0) 100%
   );
   mask-image: radial-gradient(
     circle at center,
-    rgba(0, 0, 0, 0.88) 10%,
-    rgba(0, 0, 0, 0.7) 28%,
-    rgba(0, 0, 0, 0.45) 46%,
-    rgba(0, 0, 0, 0.25) 62%,
-    rgba(0, 0, 0, 0.12) 76%,
-    rgba(0, 0, 0, 0.04) 88%,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.86) 18%,
+    rgba(0, 0, 0, 0.72) 32%,
+    rgba(0, 0, 0, 0.52) 46%,
+    rgba(0, 0, 0, 0.34) 58%,
+    rgba(0, 0, 0, 0.2) 68%,
+    rgba(0, 0, 0, 0.11) 77%,
+    rgba(0, 0, 0, 0.055) 85%,
+    rgba(0, 0, 0, 0.025) 91%,
+    rgba(0, 0, 0, 0.008) 96%,
     rgba(0, 0, 0, 0) 100%
   );
-  filter: saturate(0.95) brightness(0.84) contrast(1) blur(3.4px);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  filter: saturate(0.95) brightness(0.84) contrast(1) blur(4.5px);
   transition: opacity 0.4s ease;
 }
 
@@ -141,32 +170,6 @@ body.adventure-explore {
 
 .error {
   color: #c0392b;
-}
-
-.adventure-snapshots {
-  position: fixed;
-  right: 24px;
-  top: 24px;
-  display: grid;
-  gap: 10px;
-  z-index: 6;
-}
-
-.snapshot-frame {
-  width: 120px;
-  height: 120px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.35);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-}
-
-.snapshot-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .quest {
@@ -259,18 +262,48 @@ body.adventure-explore {
 
 .adventure-personas {
   position: fixed;
-  left: 24px;
-  top: 24px;
+  inset: 0;
   z-index: 6;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 90vw;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  padding: 16px;
 }
 
 .adventure-persona-item {
   position: relative;
   width: max-content;
+  pointer-events: auto;
+}
+
+/* Place persona icons in the four screen corners:
+   stage1 -> top-left, stage2 -> top-right, stage3 -> bottom-left, stage4 -> bottom-right */
+.adventure-persona-item--1 {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-self: start;
+}
+
+.adventure-persona-item--2 {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
+}
+
+.adventure-persona-item--3 {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+  align-self: end;
+}
+
+.adventure-persona-item--4 {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  align-self: end;
 }
 
 .adventure-persona-card {
@@ -283,24 +316,44 @@ body.adventure-explore {
   border-radius: 999px;
   color: #ffffff;
   cursor: pointer;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: transform 0.22s ease;
 }
 
 .adventure-persona-card:hover {
   transform: translateY(-1px) scale(1.03);
-  filter: brightness(1.08);
-}
-
-.adventure-persona-card-selected {
-  filter: drop-shadow(0 0 16px rgba(180, 232, 255, 0.65));
 }
 
 .adventure-persona-card img {
   display: block;
-  width: 72px;
-  height: 72px;
+  width: clamp(96px, 10vw, 140px);
+  height: clamp(96px, 10vw, 140px);
   object-fit: contain;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+  transition: filter 0.22s ease;
+  /* Layered glow: inner rim + soft halos + depth */
+  filter:
+    drop-shadow(0 0 1px rgba(255, 255, 255, 0.45))
+    drop-shadow(0 0 14px rgba(150, 215, 255, 0.55))
+    drop-shadow(0 0 36px rgba(95, 185, 255, 0.32))
+    drop-shadow(0 10px 26px rgba(0, 0, 0, 0.52));
+}
+
+.adventure-persona-card:hover img {
+  filter:
+    brightness(1.07)
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.55))
+    drop-shadow(0 0 20px rgba(170, 230, 255, 0.72))
+    drop-shadow(0 0 48px rgba(110, 205, 255, 0.42))
+    drop-shadow(0 10px 26px rgba(0, 0, 0, 0.45));
+}
+
+.adventure-persona-card.adventure-persona-card-selected img {
+  filter:
+    brightness(1.05)
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.65))
+    drop-shadow(0 0 24px rgba(190, 240, 255, 0.92))
+    drop-shadow(0 0 56px rgba(130, 215, 255, 0.58))
+    drop-shadow(0 0 88px rgba(90, 175, 255, 0.28))
+    drop-shadow(0 10px 26px rgba(0, 0, 0, 0.4));
 }
 
 .adventure-persona-popup {
@@ -318,9 +371,18 @@ body.adventure-explore {
   backdrop-filter: blur(10px);
   color: rgba(245, 250, 255, 0.97);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 14px 32px rgba(0, 0, 0, 0.45),
-    0 0 34px rgba(127, 213, 255, 0.24);
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 14px 36px rgba(0, 0, 0, 0.5),
+    0 0 42px rgba(120, 210, 255, 0.38),
+    0 0 72px rgba(85, 175, 255, 0.22),
+    0 0 120px rgba(60, 140, 255, 0.12);
+}
+
+/* If the icon is in the right column, open the popup to the left */
+.adventure-persona-item--2 .adventure-persona-popup,
+.adventure-persona-item--4 .adventure-persona-popup {
+  left: auto;
+  right: calc(100% + 12px);
 }
 
 .adventure-persona-popup-title {

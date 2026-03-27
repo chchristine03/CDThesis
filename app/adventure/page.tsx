@@ -214,9 +214,6 @@ export default function AdventurePage() {
   const movingRef = useRef(false);
   const lastSpeedRef = useRef(0);
   const soundPlayingRef = useRef(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const lastCaptureRef = useRef(0);
-  const pinchActiveRef = useRef(false);
   const [questType, setQuestType] = useState<'routine' | 'discovery' | null>(null);
   const [stage1Label, setStage1Label] = useState<
     'PATH_FOLLOWER' | 'IN_ROTATION' | 'EXPLORER' | null
@@ -253,7 +250,6 @@ export default function AdventurePage() {
   } | null>(null);
   const [discoveryHits, setDiscoveryHits] = useState<string[]>([]);
   const [discoveryDone, setDiscoveryDone] = useState(false);
-  const [snapshots, setSnapshots] = useState<string[]>([]);
   const [cameraReady, setCameraReady] = useState(false);
   const [hud, setHud] = useState({
     rotX: -8,
@@ -261,26 +257,6 @@ export default function AdventurePage() {
     zoom: 1.2,
     speed: 0,
   });
-
-  const captureSquareSnapshot = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-    const size = Math.min(canvas.width, canvas.height);
-    const sx = Math.floor((canvas.width - size) / 2);
-    const sy = Math.floor((canvas.height - size) / 2);
-    const snapshot = document.createElement('canvas');
-    snapshot.width = size;
-    snapshot.height = size;
-    const ctx = snapshot.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-    ctx.drawImage(canvas, sx, sy, size, size, 0, 0, size, size);
-    const dataUrl = snapshot.toDataURL('image/png');
-    setSnapshots([dataUrl]);
-  };
 
   useEffect(() => {
     let active = true;
@@ -552,7 +528,6 @@ export default function AdventurePage() {
 
         const result = handLandmarker.detectForVideo(videoRef.current, now);
         const primaryHand = result?.landmarks?.[0];
-        const pinchHand = result?.landmarks?.[1];
         const previous = handRef.current;
 
         let targetRotX = handRef.current.rotX;
@@ -594,30 +569,6 @@ export default function AdventurePage() {
             zoom: targetZoom,
           };
 
-        }
-
-        if (pinchHand && pinchHand.length > 0) {
-          const pinchThumb = pinchHand[4];
-          const pinchIndex = pinchHand[8];
-          const pinchDistance = Math.hypot(
-            pinchIndex.x - pinchThumb.x,
-            pinchIndex.y - pinchThumb.y
-          );
-          const pinchAmount = clamp(1 - pinchDistance / 0.12, 0, 1);
-          const nowMs = performance.now();
-          const pinchStart = pinchAmount > 0.8 && !pinchActiveRef.current;
-          const pinchEnd = pinchAmount < 0.4 && pinchActiveRef.current;
-          if (pinchStart) {
-            pinchActiveRef.current = true;
-            if (nowMs - lastCaptureRef.current > 900) {
-              lastCaptureRef.current = nowMs;
-              captureSquareSnapshot();
-            }
-          } else if (pinchEnd) {
-            pinchActiveRef.current = false;
-          }
-        } else if (pinchActiveRef.current) {
-          pinchActiveRef.current = false;
         }
 
         if (!handVisible && now - lastHandSeen > 200) {
@@ -836,8 +787,6 @@ export default function AdventurePage() {
           p.angleMode(p.DEGREES);
           p.noStroke();
           p.textureMode(p.NORMAL);
-          canvasRef.current = p.canvas;
-
           const gl = p._renderer?.GL;
           if (gl) {
             gl.enable(gl.BLEND);
@@ -1287,7 +1236,10 @@ export default function AdventurePage() {
       {personaCards.length > 0 && (
         <section className="adventure-personas" aria-label="Your personas">
           {personaCards.map(({ meta, stage }) => (
-            <div key={stage} className="adventure-persona-item">
+            <div
+              key={stage}
+              className={`adventure-persona-item adventure-persona-item--${stage}`}
+            >
               <button
                 type="button"
                 className={`adventure-persona-card${selectedStageFilter === stage ? ' adventure-persona-card-selected' : ''}`}
@@ -1374,15 +1326,6 @@ export default function AdventurePage() {
         </div>
       </div>
 
-      {snapshots.length > 0 && (
-        <aside className="adventure-snapshots">
-          {snapshots.map((src, index) => (
-            <div key={`${src}-${index}`} className="snapshot-frame">
-              <img src={src} alt={`Snapshot ${index + 1}`} />
-            </div>
-          ))}
-        </aside>
-      )}
     </main>
   );
 }
