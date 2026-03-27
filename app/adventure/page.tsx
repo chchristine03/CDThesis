@@ -30,17 +30,17 @@ const stage1PersonaMeta = {
   PATH_FOLLOWER: {
     image: '/images/stage1/path-follower.png',
     title: 'Path Follower',
-    description: 'Most of your current favorite songs were already favorites before.',
+    description: 'You return to the same favorites and build a strong connection with them.',
   },
   IN_ROTATION: {
     image: '/images/stage1/in-rotation.png',
     title: 'In Rotation',
-    description: 'Some favorites stayed while new ones entered the mix.',
+    description: 'You keep a mix of familiar songs while making room for new ones.',
   },
   EXPLORER: {
     image: '/images/stage1/explorer.png',
     title: 'Explorer',
-    description: 'Most of your current favorite songs are new to this era.',
+    description: 'You are always discovering and moving into new favorites.',
   },
 } as const;
 
@@ -54,22 +54,22 @@ const stage2PersonaMeta: Record<string, { image: string; title: string; descript
   NO_ARTIST_TIES: {
     image: '/images/stage2/no-artist-ties.png',
     title: 'No Artist Ties',
-    description: 'Your top tracks span many different artists with no single favorite.',
+    description: 'You explore freely without relying on any single artist.',
   },
   MIXED_ARTISTS: {
     image: '/images/stage2/mixed-artists.png',
     title: 'Mixed Artists',
-    description: 'You listen across a wide range of artists with varied representation.',
+    description: 'You move across different artists while keeping variety in your listening.',
   },
   ARTIST_FOCUSED: {
     image: '/images/stage2/artist-focused.png',
     title: 'Artist Focused',
-    description: 'A few artists show up often in your current favorites.',
+    description: 'You stay connected to a consistent set of artists.',
   },
   ONE_ARTIST_OBSESSED: {
     image: '/images/stage2/one-artist-obsessed.png',
     title: 'One Artist Obsessed',
-    description: 'One artist dominates your current top tracks.',
+    description: 'You have a clear favorite artist that you keep returning to, and you know who.',
   },
 };
 
@@ -82,32 +82,32 @@ const stage3PersonaMeta: Record<string, { image: string; title: string; descript
   MORNING_STARTER: {
     image: '/images/stage3/morning-starter.jpg',
     title: 'Morning Starter',
-    description: 'Most of your listening happens in the morning.',
+    description: 'Music is part of how you begin your day.',
   },
   DAYTIME_DRIFTER: {
     image: '/images/stage3/daytime-drifter.png',
     title: 'Daytime Drifter',
-    description: 'You listen most during the afternoon.',
+    description: 'Music follows you through your daily routine.',
   },
   EVENING_UNWINDER: {
     image: '/images/stage3/evening-unwinder.png',
     title: 'Evening Unwinder',
-    description: 'Your peak listening is in the evening.',
+    description: 'You use music to unwind from the day and transition into your evening.',
   },
   AFTER_HOURS: {
     image: '/images/stage3/after-hours.png',
     title: 'After Hours',
-    description: 'You listen most late at night.',
+    description: 'You are more of a night owl, turning to music when everything else is quiet.',
   },
   ALL_DAY_FLOW: {
     image: '/images/stage3/all-day-flow.png',
     title: 'All Day Flow',
-    description: 'Your listening is spread evenly across the day.',
+    description: 'Music stays with you throughout your entire day.',
   },
   LOCKED_IN: {
     image: '/images/stage3/locked-in.png',
     title: 'Locked In',
-    description: 'You were locked in, concentrated on your listening during specific hours.',
+    description: 'During these hours, whatever you were doing, your music was part of it.',
   },
 };
 
@@ -120,32 +120,32 @@ const stage4PersonaMeta: Record<string, { image: string; title: string; descript
   STREAMER: {
     image: '/images/stage4/streamer.png',
     title: 'Streamer',
-    description: 'You rely on algorithmic playlists more than your own curation.',
+    description: 'You enjoy listening in the moment, letting your music come and go naturally.',
   },
   CASUAL_CURATOR: {
     image: '/images/stage4/casual-curator.png',
     title: 'Casual Curator',
-    description: 'You maintain a modest collection of playlists.',
+    description: 'You make playlists when you need them and keep things simple.',
   },
   MICRO_CURATOR: {
     image: '/images/stage4/micro-curator.png',
     title: 'Micro Curator',
-    description: 'You create many small, focused playlists.',
+    description: 'You shape your music into specific moods and moments.',
   },
   ARCHIVIST: {
     image: '/images/stage4/archivist.png',
     title: 'Archivist',
-    description: 'You build substantial playlists and keep them organized.',
+    description: 'You keep your music organized in a way that builds over time.',
   },
   POWER_CURATOR: {
     image: '/images/stage4/power-curator.png',
     title: 'Power Curator',
-    description: 'You have a large, deeply curated playlist library.',
+    description: 'You do not just save music. You take time to curate it into something that is your own.',
   },
   WORLD_BUILDER: {
     image: '/images/stage4/world-builder.png',
     title: 'World Builder',
-    description: 'One or a few playlists dominate your listening universe.',
+    description: 'You like to go back to the same playlists and stay in them for a while.',
   },
 };
 
@@ -157,6 +157,10 @@ const stage4TextureMap: Record<string, string> = {
   POWER_CURATOR: '/images/stage4/power-curator.png',
   WORLD_BUILDER: '/images/stage4/world-builder.png',
 };
+const TOGGLE_FADE_MS = 520;
+const STAGE_STAGGER_MS = 120;
+const TOTAL_STAGE_SEQUENCE_MS = TOGGLE_FADE_MS + STAGE_STAGGER_MS * 3;
+const SELECTION_FADE_OUT_MS = 520;
 
 export default function AdventurePage() {
   const [demo, setDemo] = useState(false);
@@ -236,8 +240,36 @@ export default function AdventurePage() {
   const [stageIntensities, setStageIntensities] = useState<[number, number, number, number]>([
     0.25, 0.25, 0.25, 0.25,
   ]);
-  const [selectedStageFilter, setSelectedStageFilter] = useState<1 | 2 | 3 | 4 | null>(null);
-  const selectedStageFilterRef = useRef<1 | 2 | 3 | 4 | null>(null);
+  const [focusedStage, setFocusedStage] = useState<1 | 2 | 3 | 4 | null>(null);
+  const focusedStageRef = useRef<1 | 2 | 3 | 4 | null>(null);
+  const focusCandidateRef = useRef<1 | 2 | 3 | 4 | null>(null);
+  const focusCandidateSinceRef = useRef(0);
+  const [focusedIconScreenPos, setFocusedIconScreenPos] = useState<{ x: number; y: number } | null>(null);
+  const focusedIconScreenPosRef = useRef<{ x: number; y: number } | null>(null);
+  const lastFocusScreenPosUpdateRef = useRef(0);
+  const [selectedStage, setSelectedStage] = useState<1 | 2 | 3 | 4 | null>(null);
+  const [displayedStage, setDisplayedStage] = useState<1 | 2 | 3 | 4 | null>(null);
+  const selectedStageRef = useRef<1 | 2 | 3 | 4 | null>(null);
+  /** Default to toggle-off view after login; users can enable details via toggle. */
+  const [infoMode, setInfoMode] = useState(false);
+  const infoModeRef = useRef(false);
+  const personaItemRefs = useRef<Record<1 | 2 | 3 | 4, HTMLDivElement | null>>({
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+  });
+  const personaIconRefs = useRef<Record<1 | 2 | 3 | 4, HTMLImageElement | null>>({
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+  });
+  const [dataLinkFrom, setDataLinkFrom] = useState<{ x: number; y: number } | null>(null);
+  const [dataLinkTo, setDataLinkTo] = useState<{ x: number; y: number } | null>(null);
+  const centeredDataPanelRef = useRef<HTMLDivElement | null>(null);
+  const hideSelectionTimeoutRef = useRef<number | null>(null);
+  const clearDisplayedStageTimeoutRef = useRef<number | null>(null);
   const [stage1Detail, setStage1Detail] = useState<{
     favoritesInRotation: { trackName: string; artistName: string }[];
   } | null>(null);
@@ -438,8 +470,37 @@ export default function AdventurePage() {
   }, [questType]);
 
   useEffect(() => {
-    selectedStageFilterRef.current = selectedStageFilter;
-  }, [selectedStageFilter]);
+    focusedStageRef.current = focusedStage;
+  }, [focusedStage]);
+
+  useEffect(() => {
+    focusedIconScreenPosRef.current = focusedIconScreenPos;
+  }, [focusedIconScreenPos]);
+
+  useEffect(() => {
+    selectedStageRef.current = selectedStage;
+  }, [selectedStage]);
+
+  useEffect(() => {
+    if (clearDisplayedStageTimeoutRef.current !== null) {
+      window.clearTimeout(clearDisplayedStageTimeoutRef.current);
+      clearDisplayedStageTimeoutRef.current = null;
+    }
+    if (selectedStage !== null) {
+      setDisplayedStage(selectedStage);
+      return;
+    }
+    if (displayedStage !== null) {
+      clearDisplayedStageTimeoutRef.current = window.setTimeout(() => {
+        setDisplayedStage(null);
+        clearDisplayedStageTimeoutRef.current = null;
+      }, SELECTION_FADE_OUT_MS);
+    }
+  }, [selectedStage, displayedStage]);
+
+  useEffect(() => {
+    infoModeRef.current = infoMode;
+  }, [infoMode]);
 
   useEffect(() => {
     document.body.classList.add('adventure-view');
@@ -561,8 +622,10 @@ export default function AdventurePage() {
             indexMcp.y - pinkyMcp.y,
             indexMcp.x - pinkyMcp.x
           );
-          targetRotY = (twistAngle * 120) / Math.PI;
-          targetRotX = clamp((0.5 - wrist.y) * 80, -28, 28);
+          // Increase yaw/pitch sensitivity so users can reach sphere extremes
+          // with less physical hand rotation.
+          targetRotY = clamp((twistAngle * 170) / Math.PI, -150, 150);
+          targetRotX = clamp((0.5 - wrist.y) * 105, -36, 36);
           lastPoseRef.current = {
             rotX: targetRotX,
             rotY: targetRotY,
@@ -893,7 +956,139 @@ export default function AdventurePage() {
           const zoomInFactor = p.constrain((handState.zoom - 1.0) / 0.8, 0, 1);
           const motion = p.constrain(lastSpeedRef.current / 80, 0, 1);
           const lineAlphaBase = Math.max(0.12, zoomInFactor, motion * 0.55);
-          const filter = selectedStageFilterRef.current;
+          let detectedStage: 1 | 2 | 3 | 4 | null = null;
+          let detectedPointX = 0;
+          let detectedPointY = 0;
+          let detectedPointZ = 0;
+          let hasDetectedPoint = false;
+          if (spherePoints.length > 0) {
+            const rx = handState.rotX;
+            const ry = handState.rotY;
+            const cosX = Math.cos(rx);
+            const sinX = Math.sin(rx);
+            const cosY = Math.cos(ry);
+            const sinY = Math.sin(ry);
+
+            let bestCenterDistance = Infinity;
+            let bestFacing = -Infinity;
+            spherePoints.forEach((point) => {
+              const y1 = point.y * cosX - point.z * sinX;
+              const z1 = point.y * sinX + point.z * cosX;
+              const x2 = point.x * cosY + z1 * sinY;
+              const z2 = -point.x * sinY + z1 * cosY;
+              const len = Math.hypot(x2, y1, z2);
+              if (!len) return;
+
+              const centerDistance = Math.hypot(x2 / len, y1 / len);
+              const facing = z2 / len;
+              if (facing <= 0) return;
+              // Prioritize "most front" while staying extremely centered.
+              if (centerDistance > 0.24) return;
+              if (
+                facing > bestFacing ||
+                (Math.abs(facing - bestFacing) < 0.002 && centerDistance < bestCenterDistance)
+              ) {
+                bestCenterDistance = centerDistance;
+                bestFacing = facing;
+                detectedStage =
+                  point.textureKey === 'stage1'
+                    ? 1
+                    : point.textureKey === 'stage2'
+                      ? 2
+                      : point.textureKey === 'stage3'
+                        ? 3
+                        : 4;
+                detectedPointX = point.x;
+                detectedPointY = point.y;
+                detectedPointZ = point.z;
+                hasDetectedPoint = true;
+              }
+            });
+            // Require the chosen icon to be very close to the middle.
+            if (bestCenterDistance > 0.24) {
+              detectedStage = null;
+            }
+          }
+
+          const now = performance.now();
+          const candidate = focusCandidateRef.current;
+          if (detectedStage !== candidate) {
+            focusCandidateRef.current = detectedStage;
+            focusCandidateSinceRef.current = detectedStage ? now : 0;
+          }
+
+          let committedStage: 1 | 2 | 3 | 4 | null = null;
+          if (detectedStage && focusCandidateRef.current === detectedStage) {
+            const dwellMs = now - focusCandidateSinceRef.current;
+            if (dwellMs >= 1000) {
+              committedStage = detectedStage;
+            }
+          }
+
+          if (committedStage !== focusedStageRef.current) {
+            focusedStageRef.current = committedStage;
+            setFocusedStage(committedStage);
+          }
+
+          const projectWorldPointToScreen = (x: number, y: number, z: number) => {
+            const rx = handState.rotX;
+            const ry = handState.rotY;
+            const cosX = Math.cos(rx);
+            const sinX = Math.sin(rx);
+            const cosY = Math.cos(ry);
+            const sinY = Math.sin(ry);
+            const zoom = handState.zoom;
+
+            const y1 = y * cosX - z * sinX;
+            const z1 = y * sinX + z * cosX;
+            const x2 = x * cosY + z1 * sinY;
+            const z2 = -x * sinY + z1 * cosY;
+
+            const xView = x2 * zoom;
+            const yView = y1 * zoom;
+            const zView = z2 * zoom;
+
+            const cameraZ = p.height * 0.5 / Math.tan(Math.PI / 6);
+            const denom = cameraZ - zView;
+            if (!Number.isFinite(denom) || denom <= 1e-3) {
+              return null;
+            }
+            const perspective = cameraZ / denom;
+            const stageRect = stageRef.current?.getBoundingClientRect();
+            const stageLeft = stageRect?.left ?? 0;
+            const stageTop = stageRect?.top ?? 0;
+            return {
+              x: stageLeft + p.width * 0.5 + xView * perspective,
+              y: stageTop + p.height * 0.5 - yView * perspective,
+            };
+          };
+
+          const nowMs = performance.now();
+          if (committedStage && hasDetectedPoint) {
+            const screenPos = projectWorldPointToScreen(
+              detectedPointX,
+              detectedPointY,
+              detectedPointZ
+            );
+            if (screenPos) {
+              const prevPos = focusedIconScreenPosRef.current;
+              const canUpdate =
+                nowMs - lastFocusScreenPosUpdateRef.current > 90 ||
+                !prevPos ||
+                Math.abs(prevPos.x - screenPos.x) > 2 ||
+                Math.abs(prevPos.y - screenPos.y) > 2;
+              if (canUpdate) {
+                lastFocusScreenPosUpdateRef.current = nowMs;
+                setFocusedIconScreenPos({ x: screenPos.x, y: screenPos.y });
+              }
+            }
+          } else if (focusedIconScreenPosRef.current) {
+            setFocusedIconScreenPos(null);
+          }
+
+          const filter = infoModeRef.current
+            ? (selectedStageRef.current ?? committedStage)
+            : null;
           const dimOpacity = 0.55;
           const isFiltered = filter !== null;
 
@@ -1145,24 +1340,6 @@ export default function AdventurePage() {
   const axisXOffset = axisXNorm * axisLineLength;
   const axisYOffset = axisYNorm * axisLineLength;
 
-  const personaXOffset = axisXOffset * 0.45;
-  const personaYOffset = axisYNorm * 40;
-
-  const persona =
-    commitmentLabel === 'MICRO_CURATOR'
-      ? 'MICRO CURATOR'
-      : commitmentLabel === 'WORLD_BUILDER'
-        ? 'WORLD BUILDER'
-        : commitmentLabel === 'ARCHIVIST'
-          ? 'ARCHIVIST'
-          : commitmentLabel === 'CASUAL_CURATOR'
-            ? 'CASUAL CURATOR'
-            : commitmentLabel === 'POWER_CURATOR'
-              ? 'POWER CURATOR'
-              : commitmentLabel === 'STREAMER'
-                ? 'STREAMER'
-                : null;
-
   const stage1Meta =
     stage1Label != null ? stage1PersonaMeta[stage1Label] : undefined;
   const stage2Meta =
@@ -1172,33 +1349,35 @@ export default function AdventurePage() {
   const stage4Meta =
     commitmentLabel != null ? stage4PersonaMeta[commitmentLabel] : undefined;
 
-  const getPersonaDetail = (stage: 1 | 2 | 3 | 4) => {
+  const getStageHeadingWords = (stage: 1 | 2 | 3 | 4) => {
+    if (stage === 1) return ['FAVORITES', 'IN', 'ROTATION'];
+    if (stage === 2) return ['ARTIST', 'DIVERSITY'];
+    if (stage === 3) return ['LISTENING', 'TIME', 'PATTERN'];
+    return ['PLAYLIST', 'CURATION', 'STYLE'];
+  };
+  const getPersonaDataLines = (stage: 1 | 2 | 3 | 4) => {
     if (stage === 1) {
       return stage1Detail?.favoritesInRotation && stage1Detail.favoritesInRotation.length > 0
         ? stage1Detail.favoritesInRotation
-            .map((fav) => `${fav.trackName} by ${fav.artistName}`)
-            .join(' · ')
-        : 'No recurring favorites found yet.';
+            .slice(0, 4)
+            .map((fav) => `${fav.trackName} - ${fav.artistName}`)
+        : ['No recurring favorites found yet.'];
     }
     if (stage === 2) {
       return stage2Detail?.topArtists && stage2Detail.topArtists.length > 0
         ? stage2Detail.topArtists
-            .slice(0, 3)
+            .slice(0, 4)
             .map((artist) => `${artist.name} (${Math.round(artist.share * 100)}%)`)
-            .join(' · ')
-        : 'No dominant artist pattern yet.';
+        : ['No dominant artist pattern yet.'];
     }
     if (stage === 3) {
-      return stage3Detail?.peakWindow
-        ? stage3Detail.peakWindow
-        : 'No peak listening window yet.';
+      return [stage3Detail?.peakWindow ? `Peak time: ${stage3Detail.peakWindow}` : 'No peak listening window yet.'];
     }
     return stage4Detail && stage4Detail.examplePlaylists.length > 0
       ? stage4Detail.examplePlaylists
           .slice(0, 4)
-          .map((pl) => `${pl.name} (${pl.trackCount})`)
-          .join(' · ')
-      : 'No playlist examples available yet.';
+          .map((pl) => `${pl.name} (${pl.trackCount} tracks)`)
+      : ['No playlist examples available yet.'];
   };
 
   const personaCards = [
@@ -1207,10 +1386,97 @@ export default function AdventurePage() {
     { meta: stage3Meta, stage: 3 },
     { meta: stage4Meta, stage: 4 },
   ].filter(({ meta }) => meta != null);
+  useEffect(() => {
+    if (!focusedStage) {
+      focusCandidateRef.current = null;
+      focusCandidateSinceRef.current = 0;
+    }
+  }, [focusedStage]);
+
+  useEffect(() => {
+    return () => {
+      if (hideSelectionTimeoutRef.current !== null) {
+        window.clearTimeout(hideSelectionTimeoutRef.current);
+      }
+      if (clearDisplayedStageTimeoutRef.current !== null) {
+        window.clearTimeout(clearDisplayedStageTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const updateAnchors = () => {
+      if (!displayedStage) {
+        setDataLinkFrom(null);
+        setDataLinkTo(null);
+        return;
+      }
+      const panelEl = centeredDataPanelRef.current;
+      const iconEl = personaIconRefs.current[displayedStage];
+      if (!panelEl || !iconEl) {
+        setDataLinkFrom(null);
+        setDataLinkTo(null);
+        return;
+      }
+      const pr = panelEl.getBoundingClientRect();
+      const ir = iconEl.getBoundingClientRect();
+      setDataLinkFrom({
+        x: pr.left + pr.width / 2,
+        y: pr.top + pr.height / 2,
+      });
+      setDataLinkTo({
+        x: ir.left + ir.width / 2,
+        y: ir.top + ir.height / 2,
+      });
+    };
+    updateAnchors();
+    let rafId = requestAnimationFrame(() => updateAnchors());
+    window.addEventListener('resize', updateAnchors);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', updateAnchors);
+    };
+  }, [displayedStage]);
+
+  const setInfoModeAndClearSelection = (next: boolean) => {
+    if (hideSelectionTimeoutRef.current !== null) {
+      window.clearTimeout(hideSelectionTimeoutRef.current);
+      hideSelectionTimeoutRef.current = null;
+    }
+    setInfoMode(next);
+    if (!next) {
+      hideSelectionTimeoutRef.current = window.setTimeout(() => {
+        setSelectedStage(null);
+        hideSelectionTimeoutRef.current = null;
+      }, TOTAL_STAGE_SEQUENCE_MS);
+    }
+  };
+
+  const profileName =
+    state.status === 'ready'
+      ? (state.data.userProfile.displayName || state.data.userProfile.id || 'listener')
+      : 'listener';
 
   return (
     <main className="adventure">
-      <h1 className="adventure-sonosphere-title">SONOSPHERE</h1>
+      <p className="adventure-usernames-line" aria-live="polite">
+        <span>{profileName}&apos;s</span>
+      </p>
+      <h1 className="adventure-sonosphere-title adventure-intro-title">SONOSPHERE</h1>
+      <button
+        type="button"
+        className="adventure-info-toggle"
+        role="switch"
+        aria-checked={infoMode}
+        aria-label={
+          infoMode
+            ? 'Persona details on — switch to display only'
+            : 'Display only — switch to show persona details'
+        }
+        onClick={() => setInfoModeAndClearSelection(!infoMode)}
+      >
+        <span className="adventure-info-toggle-thumb" aria-hidden />
+      </button>
       <Script
         src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"
         strategy="afterInteractive"
@@ -1226,8 +1492,8 @@ export default function AdventurePage() {
         <p className="eyebrow">Spotify House Adventure</p>
         <h2>Your listening world</h2>
         <p className="subtitle">
-          A visual field generated from your Spotify parameters. Tap any object
-          to learn why it appears.
+          A visual field generated from your Spotify parameters. Center near an object
+          to reveal why it appears.
         </p>
         <p className="subtitle">
           <Link href="/adventure/raw">View raw user data</Link>
@@ -1235,31 +1501,46 @@ export default function AdventurePage() {
       </header>
 
       {personaCards.length > 0 && (
-        <section className="adventure-personas" aria-label="Your personas">
+        <section
+          className={`adventure-personas ${
+            infoMode ? 'adventure-personas-visible' : 'adventure-personas-hidden'
+          }`}
+          aria-label="Your personas"
+        >
           {personaCards.map(({ meta, stage }) => (
             <div
               key={stage}
-              className={`adventure-persona-item adventure-persona-item--${stage}`}
+              className={`adventure-persona-item adventure-persona-item--${stage} adventure-stage-fade ${
+                infoMode ? 'adventure-stage-fade-visible' : 'adventure-stage-fade-hidden'
+              }`}
+              style={{ ['--stage-delay' as any]: `${(stage - 1) * STAGE_STAGGER_MS}ms` }}
+              ref={(el) => {
+                personaItemRefs.current[stage as 1 | 2 | 3 | 4] = el;
+              }}
             >
-              <button
-                type="button"
-                className={`adventure-persona-card${selectedStageFilter === stage ? ' adventure-persona-card-selected' : ''}`}
-                aria-pressed={selectedStageFilter === stage}
+              <div
+                className={`adventure-corner-info${selectedStage === stage ? ' adventure-corner-info-selected' : ''}`}
                 aria-label={meta!.title}
                 onClick={() => {
-                  setSelectedStageFilter((prev) =>
-                    prev === stage ? null : (stage as 1 | 2 | 3 | 4)
-                  );
+                  setSelectedStage((prev) => (prev === stage ? null : (stage as 1 | 2 | 3 | 4)));
                 }}
               >
-                <img src={meta!.image} alt={meta!.title} />
-              </button>
-              {selectedStageFilter === stage && (
-                <div className="adventure-persona-popup" role="status" aria-live="polite">
-                  <h2 className="adventure-persona-popup-title">{meta!.title}</h2>
-                  <p className="adventure-persona-popup-description">{meta!.description}</p>
+                <div className="adventure-corner-stage">
+                  {getStageHeadingWords(stage as 1 | 2 | 3 | 4).map((word) => (
+                    <span key={word}>{word}</span>
+                  ))}
                 </div>
-              )}
+                <img
+                  className="adventure-corner-icon"
+                  src={meta!.image}
+                  alt={meta!.title}
+                  ref={(el) => {
+                    personaIconRefs.current[stage as 1 | 2 | 3 | 4] = el;
+                  }}
+                />
+                <h2 className="adventure-corner-title">"{meta!.title}"</h2>
+                <p className="adventure-corner-description">{meta!.description}</p>
+              </div>
             </div>
           ))}
         </section>
@@ -1271,39 +1552,69 @@ export default function AdventurePage() {
       )}
 
       {state.status === 'ready' && (
-        <section className="p5-world" style={worldStyle}>
+        <section className="p5-world adventure-intro-sphere" style={worldStyle}>
           <div className="p5-stage" ref={stageRef} />
         </section>
       )}
 
-      {hud.zoom > 1.9 && !selectedStageFilter && (
-        <div
-          className="adventure-persona"
-          aria-hidden="true"
-          style={{
-            left: `calc(50% + ${personaXOffset}px)`,
-            top: `calc(50% + ${personaYOffset}px)`,
-          }}
-        >
-          {state.status === 'ready' && state.data.userProfile?.displayName
-            ? state.data.userProfile.displayName
-            : persona ?? 'Your listening world'}
-        </div>
-      )}
-
-      {selectedStageFilter && hud.zoom > 1.9 && (
-        <div
-          className="adventure-persona adventure-persona-detail"
+      {displayedStage && (
+        <section
+          className={`adventure-centered-data adventure-fade-layer ${
+            infoMode && selectedStage !== null
+              ? 'adventure-fade-layer-visible'
+              : 'adventure-fade-layer-hidden'
+          }`}
           aria-live="polite"
-          style={{
-            left: `calc(50% + ${personaXOffset}px)`,
-            top: `calc(50% + ${personaYOffset}px)`,
-          }}
         >
-          {getPersonaDetail(selectedStageFilter)}
-        </div>
+          <div ref={centeredDataPanelRef} className="adventure-centered-data-anchor">
+            {getPersonaDataLines(displayedStage).map((line) => (
+              <p key={`center-${displayedStage}-${line}`}>{line}</p>
+            ))}
+          </div>
+        </section>
       )}
-
+      {displayedStage && dataLinkFrom && dataLinkTo && (
+        <svg
+          className={`adventure-focus-link adventure-focus-link--glass adventure-fade-layer ${
+            infoMode && selectedStage !== null
+              ? 'adventure-fade-layer-visible'
+              : 'adventure-fade-layer-hidden'
+          }`}
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient
+              id={`glass-data-link-${displayedStage}`}
+              gradientUnits="userSpaceOnUse"
+              x1={dataLinkFrom.x}
+              y1={dataLinkFrom.y}
+              x2={dataLinkTo.x}
+              y2={dataLinkTo.y}
+            >
+              <stop offset="0%" stopColor="rgba(255, 255, 255, 0.55)" stopOpacity="0.95" />
+              <stop offset="42%" stopColor="rgba(180, 220, 255, 0.14)" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="rgba(255, 255, 255, 0.48)" stopOpacity="0.9" />
+            </linearGradient>
+          </defs>
+          <line
+            className="adventure-focus-link-glow"
+            fill="none"
+            x1={dataLinkFrom.x}
+            y1={dataLinkFrom.y}
+            x2={dataLinkTo.x}
+            y2={dataLinkTo.y}
+          />
+          <line
+            className="adventure-focus-link-core"
+            fill="none"
+            x1={dataLinkFrom.x}
+            y1={dataLinkFrom.y}
+            x2={dataLinkTo.x}
+            y2={dataLinkTo.y}
+            stroke={`url(#glass-data-link-${displayedStage})`}
+          />
+        </svg>
+      )}
       <div className="adventure-axis-readout" aria-hidden="true">
         <div className="axis-label-row">
           <span
