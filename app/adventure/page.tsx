@@ -1463,20 +1463,22 @@ export default function AdventurePage() {
         <span>{profileName}&apos;s</span>
       </p>
       <h1 className="adventure-sonosphere-title adventure-intro-title">SONOSPHERE</h1>
-      <button
-        type="button"
-        className="adventure-info-toggle"
-        role="switch"
-        aria-checked={infoMode}
-        aria-label={
-          infoMode
-            ? 'Persona details on — switch to display only'
-            : 'Display only — switch to show persona details'
-        }
-        onClick={() => setInfoModeAndClearSelection(!infoMode)}
-      >
-        <span className="adventure-info-toggle-thumb" aria-hidden />
-      </button>
+      <div className="adventure-info-toggle-wrap">
+        <span className="adventure-info-toggle-label" id="adventure-info-toggle-desc">
+          <span className="adventure-info-toggle-label-line">Persona</span>
+          <span className="adventure-info-toggle-label-line">analysis</span>
+        </span>
+        <button
+          type="button"
+          className="adventure-info-toggle"
+          role="switch"
+          aria-checked={infoMode}
+          aria-labelledby="adventure-info-toggle-desc"
+          onClick={() => setInfoModeAndClearSelection(!infoMode)}
+        >
+          <span className="adventure-info-toggle-thumb" aria-hidden />
+        </button>
+      </div>
       <Script
         src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"
         strategy="afterInteractive"

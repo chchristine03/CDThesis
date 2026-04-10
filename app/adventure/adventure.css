@@ -132,11 +132,42 @@ body.adventure-explore {
 }
 
 /* Minimal track: persona details on/off; thumb = dotted cluster */
-.adventure-info-toggle {
+.adventure-info-toggle-wrap {
   position: fixed;
   top: calc(5.2vh + 16px);
-  right: clamp(14px, 2.5vw, 28px);
+  right: clamp(18px, 3.2vw, 40px);
   z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 14px);
+}
+
+.adventure-info-toggle-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.06em;
+  line-height: 1.05;
+  font-family: var(--adventure-font);
+  font-size: clamp(0.62rem, 1.45vw, 0.78rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.8),
+    0 0 16px rgba(200, 225, 255, 0.32);
+  pointer-events: none;
+  user-select: none;
+}
+
+.adventure-info-toggle-label-line {
+  display: block;
+}
+
+.adventure-info-toggle {
+  position: relative;
+  flex-shrink: 0;
   width: clamp(44px, 4.8vw, 54px);
   height: clamp(22px, 2.6vw, 28px);
   padding: 0;
@@ -145,8 +176,9 @@ body.adventure-explore {
   cursor: pointer;
   background: rgba(0, 0, 0, 0.22);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-    0 1px 2px rgba(0, 0, 0, 0.35);
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.42),
+    0 1px 3px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition:
@@ -158,8 +190,9 @@ body.adventure-explore {
 .adventure-info-toggle:hover {
   background: rgba(0, 0, 0, 0.3);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.09) inset,
-    0 1px 3px rgba(0, 0, 0, 0.4);
+    0 0 0 1px rgba(255, 255, 255, 0.26) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.52),
+    0 1px 4px rgba(0, 0, 0, 0.38);
 }
 
 .adventure-info-toggle:focus-visible {
@@ -167,10 +200,12 @@ body.adventure-explore {
   outline-offset: 3px;
 }
 
-/* Info on: frosted glass fill */
+/* Info on: frosted glass fill; same oval stroke as idle */
 .adventure-info-toggle[aria-checked='true'] {
   background: rgba(235, 245, 255, 0.18);
   box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.42),
     0 10px 26px rgba(0, 0, 0, 0.24),
     0 0 18px rgba(210, 230, 255, 0.16);
   backdrop-filter: blur(16px) saturate(1.4);
@@ -180,6 +215,8 @@ body.adventure-explore {
 .adventure-info-toggle[aria-checked='true']:hover {
   background: rgba(235, 245, 255, 0.24);
   box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.26) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.52),
     0 12px 30px rgba(0, 0, 0, 0.26),
     0 0 22px rgba(218, 236, 255, 0.18);
 }

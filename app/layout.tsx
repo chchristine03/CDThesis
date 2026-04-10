@@ -3,8 +3,8 @@ import './globals.css';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'Spotify House',
-  description: 'Your listening becomes a house.',
+  title: 'SONOSPHERE',
+  description: 'Your listening becomes a universe.',
 };
 
 export default function RootLayout({
